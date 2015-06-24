@@ -1,0 +1,60 @@
+<!--<script type="text/javascript" src="https://dl.dropboxusercontent.com/u/89515953/dropbox.js"></script>-->
+<script type="text/javascript" language="Javascript" src="dropbox.js">
+<table id="files_{$oDocument->document_srl}" class="rd_fnt rd_file bd_tb<!--@if(!$mi->show_files)--> show<!--@end-->">
+	<caption class="blind">Atachment</caption>
+	<tr>
+		<th scope="row" class="ui_font"><strong>{$lang->uploaded_file}</strong> <span class="fnt_count">'<b>{$oDocument->get('uploaded_count')}</b>'</span></th>
+		
+		<script>
+			var revCount = 0;
+		
+		</script>
+		
+		
+		<td>
+			<ul cond="!$mi->files_type">
+				<li loop="$oDocument->getUploadedFiles()=>$key,$file">
+			<!--	<a class="bubble" href="{getUrl('')}{$file->download_url}" title="[File Size:{FileHandler::filesize($file->file_size)}/Download:{number_format($file->download_count)}]">{$file->source_filename}</a>
+			-->
+			<a class="bubble" href="{getUrl('')}{$file->download_url}" title="[File Size:{FileHandler::filesize($file->file_size)}/Download:{number_format($file->download_count)}]">{$file->source_filename}</a>
+						<script>
+			//	alert("{$file->file_srl}");	//427 file_srl
+			//	alert("{$file->sid}");	//sid
+			//	alert("");	//298
+			//	alert("{$file->uploaded_filename}");
+			//	alert("{getUrl('')}files/attach/binaries/{$file->module_srl}/{$file->file_srl}/{$file->sid}");
+			//	alert("{getUrl('')}files/attach/binaries/{$file->module_srl}/{$file->file_srl}/{$file->sid}");
+			// alert("{$file->source_filename}");
+			
+		options.bar("{getUrl('')}files/attach/binaries/{$file->module_srl}/{$file->upload_target_srl}/{$file->sid}", "{$file->source_filename}");
+			
+			</script>
+			
+			<span class="comma">,</span></li>
+			</ul>
+			<ul cond="$mi->files_type">
+				<block loop="$oDocument->getUploadedFiles()=>$key,$file">
+{@
+	$ext = substr($file->source_filename, -4);
+	$ext = strtolower($ext);
+	$ext_img = in_array($ext,array('.jpg','jpeg','.gif','.png'));
+	$ext_video = in_array($ext,array('.mpg','mpeg','.avi','.wmv','.mp4','.mov','.mkv','.swf','.flv','.ogv','webm'));
+	$ext_audio = in_array($ext,array('.mp3','.ogg','.wma','.wav','.ape','flac','.mid'));
+}
+				<li cond="!$mi->files_img && $ext_img"><a class="bubble" href="{getUrl('')}{$file->download_url}" title="[File Size:{FileHandler::filesize($file->file_size)}/Download:{number_format($file->download_count)}]">{$file->source_filename}</a><span class="comma">,</span></li>
+				<li cond="!$mi->files_video && $ext_video"><a class="bubble" href="{getUrl('')}{$file->download_url}" title="[File Size:{FileHandler::filesize($file->file_size)}/Download:{number_format($file->download_count)}]">{$file->source_filename}</a><span class="comma">,</span></li>
+				<li cond="!$mi->files_audio && $ext_audio"><a class="bubble" href="{getUrl('')}{$file->download_url}" title="[File Size:{FileHandler::filesize($file->file_size)}/Download:{number_format($file->download_count)}]">{$file->source_filename}</a><span class="comma">,</span></li>
+				<li cond="!$mi->files_etc && (!$ext_img && !$ext_video && !$ext_audio)"><a class="bubble" href="{getUrl('')}{$file->download_url}" title="[File Size:{FileHandler::filesize($file->file_size)}/Download:{number_format($file->download_count)}]">{$file->source_filename}</a><span class="comma">,</span></li>
+				
+
+				</block>
+			</ul>
+		</td>
+	</tr>
+	
+</table>
+
+<script>
+</script>
+
+		

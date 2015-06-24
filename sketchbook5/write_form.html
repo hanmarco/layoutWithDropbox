@@ -1,0 +1,170 @@
+<include target="_header.html" />
+<?php 
+		function grabCurrentURL(){
+			if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") {
+				$url = "https://";
+			}else{
+				$url = "http://";
+			}
+			$url .= $_SERVER['SERVER_NAME'];
+			if($_SERVER['SERVER_PORT'] != 80){
+				$url .= ":".$_SERVER["SERVER_PORT"].$_SERVER["REQUEST_URI"];
+			}else{
+				$url .= $_SERVER["REQUEST_URI"];	
+			}
+			
+			$module_1 = "mid=notice";
+			$module_2 = "mid=gnotice";
+			
+			if( strpos($url, $module_1) !== false || strpos($url, $module_2) !== false ){
+				return true;
+			} else {
+				return false;
+			}
+		}
+?>
+	
+<script>//<![CDATA[
+var msg_kr_address = '{$lang->msg_kr_address}';
+var msg_kr_address_etc = '{$lang->msg_kr_address_etc}';
+//]]>
+	var d = new Date();
+	var month = d.getMonth()+1;
+	var day = d.getDate();
+	var nextDay = d.getDate()+1;
+
+	var startDate = d.getFullYear() + '-' + (month<10 ? '0' : '') + month + '-' + (day<10 ? '0' : '') + day;	
+	var endDate = d.getFullYear() + '-' + (month<10 ? '0' : '') + month + '-' + (day<10 ? '0' : '') + nextDay;
+	
+	function date_diff() {
+		var d1 = new Date(document.getElementById('title_color').value);
+		var d2 = new Date(document.getElementById('tags').value);
+		var SB = document.getElementById("submitButton");
+		if( (d2 - d1)  / 1000 / 60 / 60 / 24 < 0){
+			alert("날짜 설정 오류");
+			SB.setAttribute("type","button");
+			SB.setAttribute("onclick","alert('날짜를 다시 설정하세요.');");
+		} else {
+			SB.setAttribute("type","submit");
+			SB.setAttribute("onclick","");
+		}
+	}
+</script>
+
+<style></style>
+
+<load target="js/editor.js" type="body" />
+
+<include cond="Mobile::isMobileCheckByAgent()" target="_write_form_mobile.html" />
+
+<form cond="!Mobile::isMobileCheckByAgent()" action="./" method="post" onsubmit="return procFilter(this, window.insert)" class="bd_wrt bd_wrt_main clear" oninput="date_diff()">
+	<input type="hidden" name="mid" value="{$mid}" />
+	<!--@if(!$oDocument->getContentText() && $mi->content_default)-->
+	<input type="hidden" name="content" value="{htmlspecialchars($mi->content_default)}" />
+	<!--@else-->
+	<input type="hidden" name="content" value="{$oDocument->getContentText()}" />
+	<!--@end-->
+	<input type="hidden" name="document_srl" value="{$document_srl}" />
+
+	<!--// 상단 : 카테고리, 제목 -->
+	<table class="bd_wrt_hd bd_tb">
+		<tr>
+			<td>
+				<select cond="$mi->use_category=='Y' && $category_list" name="category_srl" class="category">
+					<option value="">{$lang->category}</option>
+					<option loop="$category_list => $val" disabled="disabled"|cond="!$val->grant" value="{$val->category_srl}" selected="selected"|cond="$val->grant&&$val->selected||$val->category_srl==$oDocument->get('category_srl')">
+						{str_repeat("&nbsp;&nbsp;",$val->depth)} {$val->title} ({$val->document_count})
+					</option>
+				</select>
+			</td>
+			<td width="100%" style="padding-right:12px">
+				<span class="itx_wrp">
+					<label for="postTitle">{$lang->title}</label>
+					<input cond="$oDocument->getTitleText()" type="text" name="title" class="itx" id="postTitle" title="{$lang->title}" value="{htmlspecialchars($oDocument->getTitleText())}" />
+					<input cond="!$oDocument->getTitleText()" type="text" name="title" class="itx" id="postTitle" title="{$lang->title}" />
+				</span>
+			</td>
+			<td cond="$is_logged && !$oDocument->isExists() || $oDocument->get('status')=='TEMP'" class="m_no"><button type="button" class="bd_btn" onclick="doDocumentLoad(this);">{$lang->cmd_load}</button></td>
+		</tr>
+	</table>
+
+	<table cond="count($extra_keys)" class="exForm bd_tb">
+		<caption><strong><em>*</em></strong> <small>: {$lang->is_required}</small></caption>
+		<tr loop="$extra_keys=>$key,$val">
+			<th scope="row"><em cond="$val->is_required=='Y'">*</em> {$val->name}</th>
+			<td>{$val->getFormHTML()}</td>
+		</tr>
+	</table>
+
+	<div class="get_editor">{$oDocument->getEditor()}</div>
+	
+	<!--// 태그 -->
+	<!--@ if( grabCurrentURL() )-->
+	<div class="tag itx_wrp" style="display:inline;" >
+			<span> 시작일자 : </span>
+			<span>{$oDocument->getHomepageUrl()}</span>
+			<input type="date" name="title_color" id="title_color" class="color-indicator" style="width : 150px"/>
+		<div style="display: inline; margin-left: 50px;">
+			<span> 종료일자 :  </span>
+            <input type="date" name="tags" id="tags" class="itx" style="width : 150px"/>
+			<script>
+				var startTag = document.getElementById("title_color");
+				var endTag = document.getElementById("tags");
+				startTag.setAttribute("value", startDate);
+				endTag.setAttribute("value", endDate);
+			</script>
+		</div>
+	</div>
+	<!--@end-->
+
+	<!--// 비로그인 입력 -->
+	<div class="edit_opt">
+		<block cond="!$is_logged">
+		<span class="itx_wrp">
+			<label for="nick_name">{$lang->writer}</label>
+            <input type="text" name="nick_name" id="nick_name" value="{$oDocument->getNickName()}" class="itx n_p" />
+		</span>
+		<span class="itx_wrp">
+			<label for="password">{$lang->password}</label>
+            <input type="password" name="password" id="password" class="itx n_p" />
+		</span>
+		<span class="itx_wrp">
+			<label for="email_address">{$lang->email_address}</label>
+            <input type="text" name="email_address" id="email_address" value="{htmlspecialchars($oDocument->get('email_address'))}" class="itx m_h" />
+		</span>
+		<span class="itx_wrp">
+			<label for="homepage">{$lang->homepage}</label>
+            <input type="text" name="homepage" id="homepage" value="{htmlspecialchars($oDocument->get('homepage'))}" class="itx m_h" />
+		</span>
+		</block>
+	</div>
+
+	<!--// 글쓰기 옵션 체크 -->
+	<div class="opt_chk clear">
+		<div cond="$grant->manager || $mi->tl_color=='2'" class="section">
+			<input type="checkbox" name="is_notice" value="Y" checked="checked"|cond="$oDocument->isNotice()" id="is_notice" />
+			<label for="is_notice">{$lang->notice}</label>
+			</block>
+		</div>
+		<div class="section">
+			<input type="checkbox" name="comment_status" value="ALLOW" checked="checked"|cond="$oDocument->allowComment()" id="comment_status" />
+			<label for="comment_status">{$lang->allow_comment}</label>
+		</div>
+	</div>
+
+	<!--// SocialXE -->
+	<div cond="$mi->cmt_wrt=='sns'" class="sns_wrt">
+		<p>※ {$lang->sns_wrt}.</p>
+		<img class="zbxe_widget_output" widget="socialxe_info" colorset="{$mi->colorset}" skin="default"  />
+	</div>
+
+	<!--// Buttons -->
+	<div class="regist">
+		<button cond="$is_logged && !$oDocument->isExists() || $oDocument->get('status')=='TEMP'" type="button" onclick="doDocumentSave(this);" class="bd_btn temp">{$lang->cmd_temp_save}</button>
+		<input type="button" value="{$lang->cmd_preview}" onclick="doDocumentPreview(this);return false" class="bd_btn m_no" />
+		<input type="submit" value="{$lang->cmd_submit}" class="bd_btn blue" id="submitButton" />
+		<button type="button" onclick="history.back()" class="bd_btn cancle">{$lang->cmd_back}</button>
+	</div>
+</form>
+
+</div>
