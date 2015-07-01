@@ -23,7 +23,12 @@ jQuery(function($){
 		$query = $oDB->_query('select * from xe_menu_item where menu_item_srl = '.((int)($mi->module_srl)+1).'');
 		$result = $oDB->_fetch($query);
 	}
-<div cond="!$mi->hd_tx"><a class = "board_name_upper" href="{$result->url}">{$result->name}</a></div>
+
+	<!-- <a href="{getUrl('act','dispMemberLogout')}"> 
+<div cond="!$mi->hd_tx"><a class = "board_name_upper" href="./index.php?mid={$result->url}">{$result->name}</a></div>
+
+-->
+<div cond="!$mi->hd_tx"><a class = "board_name_upper" href="{getUrl('mid',$result->url)}">{$result->name}</a></div>
 <div cond="$mi->hd_tx=='2' && $oDocument->isExists()">{$mi->header_text}</div>
 <div cond="$mi->hd_tx=='3' && !$oDocument->isExists()">{$mi->header_text}</div>
 
